@@ -1,0 +1,3 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_rental_amortization_header_user,rental_amortization.header.user,model_rental_amortization_header,base.group_user,1,1,1,1
+access_rental_amortization_detail_user,rental_amortization.detail.user,model_rental_amortization_detail,base.group_user,1,1,1,1

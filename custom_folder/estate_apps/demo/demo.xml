@@ -1,0 +1,8 @@
+<odoo>
+    <record id="demo_property_1" model="estate.property">
+        <field name="name">Property 1</field>
+        <field name="description">Description 1</field>
+        <field name="price">100000</field>
+        <field name="bedrooms">3</field>
+    </record>
+</odoo>

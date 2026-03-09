@@ -1,0 +1,110 @@
+<odoo>
+<record id="view_rental_amortization_header_form" model="ir.ui.view">
+    <field name="name">rental.amortization.header.form</field>
+    <field name="model">rental.amortization.header</field>
+    <field name="arch" type="xml">
+        <form string="Amortization Schedule">
+            
+            <header>
+                <button name="action_confirm" type="object" string="Confirm"
+                        class="btn-primary"
+                        invisible="status != 'draft'"/>
+                <button name="action_generate_schedule" type="object"
+                        string="Generate Schedule"
+                        class="btn-secondary"
+                        invisible="status not in ('draft', 'confirmed')"/>
+                <button name="action_done" type="object"
+                        string="Mark as Done"
+                        invisible="status != 'confirmed'"/>
+
+                <field name="status"
+                       widget="statusbar"
+                       statusbar_visible="draft,confirmed,done,cancelled"/>
+            </header>
+
+            <sheet>
+                <div class="oe_title">
+                    <h1>
+                        <field name="name" readonly="1"/>
+                    </h1>
+                </div>
+
+                <group string="Loan Information" col="4">
+                    <field name="rental_asset_Id"/>
+                    <field name="partner_id" options="{'no_create': False}"/>
+                    <field name="currency_id" invisible="1"/>
+                    <field name="amount" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                    <field name="annual_rate" widget="percentage"/>
+                    <field name="term"/>
+                    <field name="start_date"/>
+                </group>
+
+                <group string="Calculated Details" col="4">
+                    <field name="total_month" readonly="1"/>
+                    <field name="monthly_rate" readonly="1"/>
+                    <field name="monthly_payment" readonly="1" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                    <field name="end_date" readonly="1"/>
+                </group>
+
+                <notebook>
+                    <page string="Amortization Schedule">
+                        <field name="rental_amortization_detail_ids" nolabel="1">
+                            <list editable="bottom">
+                                <field name="currency_id" column_invisible="True"/>
+                                <field name="payment_date"/>
+                                <field name="payment_amount" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                                <field name="interest_rate"/>
+                                <field name="interest_amount" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                                <field name="principal_amount" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                                <field name="remaining_balance" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                            </list>
+                        </field>
+                    </page>
+
+                    <page string="Notes">
+                        <field name="notes" placeholder="Additional remarks..."/>
+                    </page>
+                </notebook>
+            </sheet>
+
+            <chatter/>
+
+        </form>
+    </field>
+</record>
+
+<record id="view_rental_amortization_header_list" model="ir.ui.view">
+    <field name="name">rental.amortization.header.list</field>
+    <field name="model">rental.amortization.header</field>
+    <field name="arch" type="xml">
+        <list string="Amortization Schedules">
+            <field name="name"/>
+            <field name="partner_id"/>
+            <!-- mata uang dollar -->
+            <field name="amount" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+            <field name="annual_rate" widget="percentage"/>
+            <field name="term"/>
+            <field name="start_date"/>
+            <field name="end_date"/>
+            <field name="status"/>
+        </list>
+    </field>
+</record>
+
+<record id="action_rental_amortization_header" model="ir.actions.act_window">
+    <field name="name">Amortization Schedules</field>
+    <field name="res_model">rental.amortization.header</field>
+    <field name="view_mode">list,form</field>
+</record>
+
+<menuitem id="menu_rental_amortization_root"
+          name="Rental Amortization"
+          sequence="2"/>
+
+<menuitem id="menu_rental_amortization_header"
+          name="Amortization Schedules"
+          parent="menu_rental_amortization_root"
+          action="action_rental_amortization_header"
+          sequence="2"/>
+
+</odoo>

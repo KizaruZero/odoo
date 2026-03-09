@@ -1,0 +1,10 @@
+<odoo>
+<record id="cron_rental_asset_request_reminder" model="ir.cron">
+    <field name="name">Asset Request Approval Reminder</field>
+    <field name="model_id" ref="model_rental_asset_request_header"/>
+    <field name="state">code</field>
+    <field name="code">model.cron_send_approval_reminder()</field>
+    <field name="interval_number">1</field>
+    <field name="interval_type">days</field>
+</record>
+</odoo>

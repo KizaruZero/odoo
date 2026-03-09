@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- ========== PROPERTY TYPE ========== -->
+        <record id="view_estate_property_type_list" model="ir.ui.view">
+            <field name="name">estate.property.type.list</field>
+            <field name="model">estate.property.type</field>
+            <field name="arch" type="xml">
+                <list>
+                    <field name="sequence" widget="handle" optional="show"/>
+                    <field name="name"/>
+                    <field name="description"/>
+                    <field name="property_ids" column_invisible="1"/>
+                </list>
+            </field>
+        </record>
+
+        <record id="view_estate_property_type_form" model="ir.ui.view">
+            <field name="name">estate.property.type.form</field>
+            <field name="model">estate.property.type</field>
+            <field name="arch" type="xml">
+                <form>
+                    <sheet>
+                        <group>
+                            <field name="name"/>
+                            <field name="description" placeholder="Description of this property type..."/>
+                        </group>
+                        <notebook>
+                            <page string="Properties using this type">
+                                <field name="property_ids" readonly="1" nolabel="1">
+                                    <list>
+                                        <field name="name"/>
+                                        <field name="property_status"/>
+                                        <field name="price"/>
+                                    </list>
+                                </field>
+                            </page>
+                        </notebook>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="action_estate_property_type" model="ir.actions.act_window">
+            <field name="name">Property Types</field>
+            <field name="res_model">estate.property.type</field>
+            <field name="view_mode">list,form</field>
+            <field name="view_id" ref="view_estate_property_type_list"/>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    Create your first property type (e.g. House, Apartment, Commercial).
+                </p>
+            </field>
+        </record>
+
+        <!-- ========== PROPERTY TAG ========== -->
+        <record id="view_estate_property_tag_list" model="ir.ui.view">
+            <field name="name">estate.property.tag.list</field>
+            <field name="model">estate.property.tag</field>
+            <field name="arch" type="xml">
+                <list>
+                    <field name="name"/>
+                    <field name="property_ids" column_invisible="1"/>
+                    <field name="color" widget="color_picker" optional="show"/>
+                </list>
+            </field>
+        </record>
+
+        <record id="view_estate_property_tag_form" model="ir.ui.view">
+            <field name="name">estate.property.tag.form</field>
+            <field name="model">estate.property.tag</field>
+            <field name="arch" type="xml">
+                <form>
+                    <sheet>
+                        <group>
+                            <field name="name" placeholder="e.g. Garden, Pool, Renovated..."/>
+                            <field name="color" widget="color_picker" optional="show"/>
+                        </group>
+                        <group string="Properties with this tag">
+                            <field name="property_ids" readonly="1" nolabel="1">
+                                <list>
+                                    <field name="name"/>
+                                    <field name="property_status"/>
+                                    <field name="price"/>
+                                </list>
+                            </field>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="action_estate_property_tag" model="ir.actions.act_window">
+            <field name="name">Property Tags</field>
+            <field name="res_model">estate.property.tag</field>
+            <field name="view_mode">list,form</field>
+            <field name="view_id" ref="view_estate_property_tag_list"/>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    Create your first property tag (e.g. Garden, Pool, Renovated).
+                </p>
+            </field>
+        </record>
+
+        <!-- ========== SETTINGS MENU ========== -->
+        <menuitem id="menu_estate_configuration"
+                  name="Configuration"
+                  parent="menu_estate_root"
+                  sequence="50"/>
+        <menuitem id="menu_estate_property_type"
+                  name="Property Types"
+                  parent="menu_estate_configuration"
+                  action="action_estate_property_type"
+                  sequence="10"/>
+        <menuitem id="menu_estate_property_tag"
+                  name="Property Tags"
+                  parent="menu_estate_configuration"
+                  action="action_estate_property_tag"
+                  sequence="20"/>
+    </data>
+</odoo>

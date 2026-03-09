@@ -1,0 +1,60 @@
+<odoo>
+  <data>
+    <!-- explicit list view definition -->
+<!--
+    <record model="ir.ui.view" id="rental_apps.list">
+      <field name="name">rental_apps list</field>
+      <field name="model">rental_apps.rental_apps</field>
+      <field name="arch" type="xml">
+        <list>
+          <field name="name"/>
+          <field name="value"/>
+          <field name="value2"/>
+        </list>
+      </field>
+    </record>
+-->
+
+    <!-- actions opening views on models -->
+<!--
+    <record model="ir.actions.act_window" id="rental_apps.action_window">
+      <field name="name">rental_apps window</field>
+      <field name="res_model">rental_apps.rental_apps</field>
+      <field name="view_mode">list,form</field>
+    </record>
+-->
+
+    <!-- server action to the one above -->
+<!--
+    <record model="ir.actions.server" id="rental_apps.action_server">
+      <field name="name">rental_apps server</field>
+      <field name="model_id" ref="model_rental_apps_rental_apps"/>
+      <field name="state">code</field>
+      <field name="code">
+        action = {
+          "type": "ir.actions.act_window",
+          "view_mode": "list,form",
+          "res_model": model._name,
+        }
+      </field>
+    </record>
+-->
+
+    <!-- Top menu item -->
+<!--
+    <menuitem name="rental_apps" id="rental_apps.menu_root"/>
+-->
+    <!-- menu categories -->
+<!--
+    <menuitem name="Menu 1" id="rental_apps.menu_1" parent="rental_apps.menu_root"/>
+    <menuitem name="Menu 2" id="rental_apps.menu_2" parent="rental_apps.menu_root"/>
+-->
+    <!-- actions -->
+<!--
+    <menuitem name="List" id="rental_apps.menu_1_list" parent="rental_apps.menu_1"
+              action="rental_apps.action_window"/>
+    <menuitem name="Server to list" id="rental_apps" parent="rental_apps.menu_2"
+              action="rental_apps.action_server"/>
+-->
+  </data>
+</odoo>

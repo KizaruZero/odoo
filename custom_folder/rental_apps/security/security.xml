@@ -1,0 +1,15 @@
+<odoo>
+
+    <record id="group_rental_l1_manager" model="res.groups">
+        <field name="name">Rental L1 Manager</field>
+    </record>
+
+    <record id="group_rental_l2_manager" model="res.groups">
+        <field name="name">Rental L2 Sr Manager</field>
+    </record>
+
+    <record id="group_rental_l3_director" model="res.groups">
+        <field name="name">Rental L3 Director</field>
+    </record>
+
+</odoo>

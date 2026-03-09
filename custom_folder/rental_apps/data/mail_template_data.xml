@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="mail_template_approval_reminder" model="mail.template">
+        <field name="name">Rental: Approval Reminder</field>
+        <!-- refer ke model yg kita gunakan, jadi tinggal parsing object.field_name -->
+        <field name="model_id" ref="model_rental_asset_request_header"/> 
+        <field name="subject">Reminder: Please approve request {{ object.name }}</field>
+        <field name="email_from">{{ (user.email_formatted or '') }}</field>
+        <field name="use_default_to" eval="False"/>
+        <field name="body_html" type="html">
+<div style="margin: 0px; padding: 0px; font-size: 13px;">
+    <p>Dear <t t-out="ctx.get('approver_name', 'Approver')">Approver</t>,</p>
+    <p>This is a reminder to please approve the following rental asset request:</p>
+    <p><strong>Request:</strong> <t t-out="object.name">-</t></p>
+    <p><strong>Date:</strong> <t t-out="object.date">-</t></p>
+    <p><strong>Partner:</strong> <t t-out="object.partner_id.name or '-'">-</t></p>
+    <p><strong>Required Date:</strong> <t t-out="object.required_date or '-'">-</t></p>
+    <p>Please review and take action on this request.</p>
+</div>
+        </field>
+    </record>
+</odoo>
