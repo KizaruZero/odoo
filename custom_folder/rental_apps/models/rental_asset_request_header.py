@@ -94,20 +94,41 @@ class RentalAssetRequestHeader(models.Model):
             rec.can_approve = False
             if rec.state != 'waiting':
                 continue
+            Delegation = rec.env['rental.delegate.approval']
+            delegator_delegations = Delegation.search([
+                ('approval_id.user_id', '=', rec.env.user.id),
+                ('delegate_date', '<=', fields.Date.today()),
+                ('delegate_maximum_date', '>=', fields.Date.today()),
+            ])
+
+            delegate_delegations = Delegation.search([
+                ('delegate_id', '=', rec.env.user.id),
+                ('delegate_date', '<=', fields.Date.today()),
+                ('delegate_maximum_date', '>=', fields.Date.today()),
+            ])
             # User harus punya approval line dengan state waiting
             waiting_for_user = rec.approval_line_ids.filtered(
                 lambda x: x.user_id == rec.env.user and x.state == 'waiting' and x.is_active
             )
+            if not waiting_for_user and delegate_delegations:
+                original_users = delegate_delegations.mapped('approval_id.user_id')
+                waiting_for_user = rec.approval_line_ids.filtered(
+                    lambda x: x.user_id in original_users and x.state == 'waiting' and x.is_active
+                )
             if not waiting_for_user:
                 continue
             # Cek jika level sebelumnya belum di approve maka tidak bisa approve
-            user_level = waiting_for_user.level
+            user_level = waiting_for_user[:1].level
             previous_approval = rec.approval_line_ids.filtered(
                 lambda x: x.level < user_level and x.is_active
             )
             if previous_approval.filtered(lambda x: x.state != 'approved'):
                 continue
-            rec.can_approve = True
+            
+            if delegator_delegations:
+                rec.can_approve = False
+            else:
+                rec.can_approve = True
 
     @api.depends('approval_line_ids', 'approval_line_ids.state', 'approval_line_ids.user_id', 'state')
     def _compute_can_reject(self):
@@ -115,21 +136,43 @@ class RentalAssetRequestHeader(models.Model):
             rec.can_reject = False
             if rec.state != 'waiting':
                 continue
-            # User harus punya approval line dengan state waiting
+            Delegation = rec.env['rental.delegate.approval']
+            delegator_delegations = Delegation.search([
+                ('approval_id.user_id', '=', rec.env.user.id),
+                ('delegate_date', '<=', fields.Date.today()),
+                ('delegate_maximum_date', '>=', fields.Date.today()),
+            ])
+
+            delegate_delegations = Delegation.search([
+                ('delegate_id', '=', rec.env.user.id),
+                ('delegate_date', '<=', fields.Date.today()),
+                ('delegate_maximum_date', '>=', fields.Date.today()),
+            ])
+
             waiting_for_user = rec.approval_line_ids.filtered(
                 lambda x: x.user_id == rec.env.user and x.state == 'waiting' and x.is_active
             )
+
+            if not waiting_for_user and delegate_delegations:
+                original_users = delegate_delegations.mapped('approval_id.user_id')
+                waiting_for_user = rec.approval_line_ids.filtered(
+                    lambda x: x.user_id in original_users and x.state == 'waiting' and x.is_active
+                )
+
             if not waiting_for_user:
                 continue
-            # Cek jika level sebelumnya belum di approve maka tidak bisa reject
-            user_level = waiting_for_user.level
+
+            user_level = waiting_for_user[:1].level
             previous_approval = rec.approval_line_ids.filtered(
                 lambda x: x.level < user_level and x.is_active
             )
             if previous_approval.filtered(lambda x: x.state != 'approved'):
                 continue
-            rec.can_reject = True
-            
+
+            if delegator_delegations:
+                rec.can_reject = False
+            else:
+                rec.can_reject = True
 
     @api.depends('line_ids.quantity')
     def _compute_total_qty(self):
@@ -199,19 +242,30 @@ class RentalAssetRequestHeader(models.Model):
         if not config:
             return
 
-        self.env['rental.asset.request.approval'].create({
+        # Jika ada delegasi aktif untuk config ini, assign ke delegate;
+        # kalau tidak ada, assign ke user asli di config.
+        Delegation = self.env['rental.delegate.approval']
+        delegation = Delegation.search([
+            ('approval_id', '=', config.id),
+            ('delegate_date', '<=', fields.Date.today()),
+            ('delegate_maximum_date', '>=', fields.Date.today()),
+        ], limit=1)
+
+        target_user = delegation.delegate_id or config.user_id
+
+        approval = self.env['rental.asset.request.approval'].create({
             'request_id': self.id,
             'level': level,
-            'user_id': config.user_id.id,
+            'user_id': target_user.id,
         })
 
         # Notifikasi Odoo ke user yang ditugaskan approval: chatter + bell (inbox)
-        if config.user_id.partner_id:
-            partner_id = config.user_id.partner_id.id
+        if target_user.partner_id:
+            partner_id = target_user.partner_id.id
             self.message_subscribe(partner_ids=[partner_id])
             body = (
                 f"Approval Level {level} has been assigned to <b>%s</b>. Your action is required."
-                % config.user_id.name
+                % target_user.name
             )
             self.message_post(
                 body=body,
@@ -225,11 +279,28 @@ class RentalAssetRequestHeader(models.Model):
             )
         
     def action_approve(self):
+        # Cari approval line untuk user yang login
         approval = self.approval_line_ids.filtered(
             lambda x: x.user_id == self.env.user and x.state == 'waiting' and x.is_active
         )
+
+        # Jika tidak ada, cek apakah user adalah delegate aktif dari approver asli
+        if not approval:
+            Delegation = self.env['rental.delegate.approval']
+            delegate_delegations = Delegation.search([
+                ('delegate_id', '=', self.env.user.id),
+                ('delegate_date', '<=', fields.Date.today()),
+                ('delegate_maximum_date', '>=', fields.Date.today()),
+            ])
+            if delegate_delegations:
+                original_users = delegate_delegations.mapped('approval_id.user_id')
+                approval = self.approval_line_ids.filtered(
+                    lambda x: x.user_id in original_users and x.state == 'waiting' and x.is_active
+                )
+
         if not approval:
             raise UserError("You have no pending approval to approve")
+
         approval = approval[:1]
 
         # jika approval level sebelumnya belum di approve maka tidak bisa approve
@@ -264,11 +335,29 @@ class RentalAssetRequestHeader(models.Model):
         }
 
     def action_reject(self):
+        # Cari approval line untuk user yang login
         approval = self.approval_line_ids.filtered(
             lambda x: x.user_id == self.env.user and x.state == 'waiting' and x.is_active
         )
+
+        # Jika tidak ada, cek apakah user adalah delegate aktif dari approver asli
+        if not approval:
+            Delegation = self.env['rental.delegate.approval']
+            delegate_delegations = Delegation.search([
+                ('delegate_id', '=', self.env.user.id),
+                ('delegate_date', '<=', fields.Date.today()),
+                ('delegate_maximum_date', '>=', fields.Date.today()),
+            ])
+            if delegate_delegations:
+                original_users = delegate_delegations.mapped('approval_id.user_id')
+                approval = self.approval_line_ids.filtered(
+                    lambda x: x.user_id in original_users and x.state == 'waiting' and x.is_active
+                )
+
         if not approval:
             raise ValidationError("You have no pending approval to reject")
+
+        approval = approval[:1]
         previous_approval = self.approval_line_ids.filtered(
             lambda x: x.level < approval.level and x.is_active
         )

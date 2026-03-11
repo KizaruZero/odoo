@@ -1,5 +1,4 @@
 <odoo>
-
     <record id="view_rental_approval_config_list" model="ir.ui.view">
         <field name="name">rental.approval.config.list</field>
         <field name="model">rental.approval.config</field>
@@ -32,10 +31,17 @@
         <field name="view_mode">list,form</field>
     </record>
 
+    <!-- Root menu for all approval configs -->
     <menuitem id="menu_rental_approval_config"
               name="Approval Configuration"
-              parent="menu_rental_root"
-              action="action_rental_approval_config"/>
+              parent="menu_rental_root"/>
+
+    <!-- Submenu: main level/user mapping -->
+    <menuitem id="menu_rental_approval_config_main"
+              name="Approval Configuration"
+              parent="menu_rental_approval_config"
+              action="action_rental_approval_config"
+              sequence="10"/>
 
     <!-- Brand & Qty Approval Rules -->
     <record id="view_rental_asset_approval_config_list" model="ir.ui.view">
@@ -82,8 +88,8 @@
 
     <menuitem id="menu_rental_asset_approval_config"
               name="Brand &amp; Qty Rules"
-              parent="menu_rental_root"
+              parent="menu_rental_approval_config"
               action="action_rental_asset_approval_config"
-              sequence="40"/>
+              sequence="20"/>
 
 </odoo>

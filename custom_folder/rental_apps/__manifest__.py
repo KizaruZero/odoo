@@ -28,6 +28,7 @@ Long description of module's purpose
         'security/ir.model.access.csv',
         'views/rental_asset_request_views.xml',
         'views/rental_approval_config_views.xml',
+        'views/rental_delegate_approval_views.xml',
         'wizard/rental_asset_request_reject_wizard_views.xml',
         'views/cron.xml',
     ],

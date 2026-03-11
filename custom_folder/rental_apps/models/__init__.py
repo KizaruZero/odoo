@@ -4,4 +4,5 @@ from . import rental_asset_request_brand
 from . import rental_asset_request_approval
 from . import rental_approval_config
 from . import rental_asset_approval_config
+from . import rental_delegate_approval
 

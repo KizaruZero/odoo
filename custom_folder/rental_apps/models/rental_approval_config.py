@@ -19,10 +19,15 @@ class RentalApprovalConfig(models.Model):
 
     def name_get(self):
         res = []
-        # show selection label (e.g. "L1 Manager") instead of technical value
+        # Show selection label + approver name for clarity in dropdowns/tags
         labels = dict(self._fields['level'].selection)
         for rec in self:
-            res.append((rec.id, labels.get(rec.level, rec.level or '')))
+            level_label = labels.get(rec.level, rec.level or '')
+            if rec.user_id and rec.user_id.name:
+                display = f"{level_label} — {rec.user_id.name}"
+            else:
+                display = level_label
+            res.append((rec.id, display))
         return res
     
     
