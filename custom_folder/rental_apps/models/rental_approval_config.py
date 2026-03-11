@@ -4,6 +4,7 @@ from odoo import models, fields
 class RentalApprovalConfig(models.Model):
     _name = 'rental.approval.config'
     _description = 'Rental Approval Configuration'
+    _rec_name = 'level'
 
     level = fields.Selection([
         ('1', 'L1 Manager'),
@@ -15,3 +16,15 @@ class RentalApprovalConfig(models.Model):
         'res.users',
         required=True
     )
+
+    def name_get(self):
+        res = []
+        # show selection label (e.g. "L1 Manager") instead of technical value
+        labels = dict(self._fields['level'].selection)
+        for rec in self:
+            res.append((rec.id, labels.get(rec.level, rec.level or '')))
+        return res
+    
+    
+    
+    

@@ -8,6 +8,13 @@ class RentalAssetRequestHeader(models.Model):
     _inherit = ['mail.thread', 'mail.activity.mixin']
     _rec_name = 'name'
 
+    request_number = fields.Char(
+        string="Request Number",
+        required=True,
+        copy=False,
+        readonly=True,
+        default="/"
+    )
     name = fields.Char(
         string="Request Description",
         required=True,
@@ -71,6 +78,15 @@ class RentalAssetRequestHeader(models.Model):
         compute="_compute_can_reject",
         help="True if current user can reject this request"
     )
+    
+    @api.model_create_multi
+    def create(self, vals_list):
+        records = super().create(vals_list)
+        for rec in records:
+            if not rec.request_number or rec.request_number == "/":
+                year = (rec.date and rec.date.year) or fields.Date.today().year
+                rec.request_number = f"RENT/{year}/{rec.id}"
+        return records
 
     @api.depends('approval_line_ids', 'approval_line_ids.state', 'approval_line_ids.user_id', 'state')
     def _compute_can_approve(self):
@@ -139,33 +155,39 @@ class RentalAssetRequestHeader(models.Model):
             rec.state = 'draft'
             
     def _generate_approval_matrix(self):
-        # self.approval_line_ids.unlink()
-        # Nonaktifkan approval lama (riwayat tetap), buat approval baru untuk submit ini
+    # Nonaktifkan approval lama (riwayat tetap)
         self.approval_line_ids.write({'is_active': False})
 
-        brands = self.line_ids.mapped('brand_id.name')
-        total_qty = self.total_qty
-
         for rec in self:
+            brands = rec.line_ids.mapped('brand_id')
+            total_qty = rec.total_qty
 
-            # Honda group
-            if any(b in ['Honda', 'Toyota', 'Mitsubishi', 'Mazda'] for b in brands):
-                if total_qty <= 2:
-                    rec._create_approval('1')
-                else:
-                    rec._create_approval('1')
-                    rec._create_approval('2')
-                    rec._create_approval('3')
+            if not brands or not total_qty:
+                continue
 
-            # BMW group
-            elif any(b in ['BMW', 'Mercedes'] for b in brands):
-                if total_qty <= 2:
-                    rec._create_approval('1')
-                    rec._create_approval('2')
-                else:
-                    rec._create_approval('1')
-                    rec._create_approval('2')
-                    rec._create_approval('3')
+            rules = self.env['rental.asset.approval.config'].search([
+                ('brand_ids', 'in', brands.ids),
+                ('min_qty', '<=', total_qty),
+                '|',
+                    ('max_qty', '>=', total_qty),
+                    ('max_qty', '=', 0),  # 0 = unlimited
+            ])
+
+            if not rules:
+                rec._create_approval('1')
+                continue
+
+            # Ambil semua level dari rules, urutkan berdasarkan field level ('1','2','3',...)
+            level_configs = rules.mapped('level_ids')
+            level_configs = level_configs.sorted(key=lambda l: int(l.level))
+
+            # Hilangkan duplikat level kalau rule-nya overlap
+            seen_levels = set()
+            for cfg in level_configs:
+                if cfg.level in seen_levels:
+                    continue
+                seen_levels.add(cfg.level)
+                rec._create_approval(cfg.level)
 
 
     def _create_approval(self, level):

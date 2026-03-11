@@ -37,4 +37,53 @@
               parent="menu_rental_root"
               action="action_rental_approval_config"/>
 
+    <!-- Brand & Qty Approval Rules -->
+    <record id="view_rental_asset_approval_config_list" model="ir.ui.view">
+        <field name="name">rental.asset.approval.config.list</field>
+        <field name="model">rental.asset.approval.config</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="description"/>
+                <field name="brand_ids"/>
+                <field name="min_qty"/>
+                <field name="max_qty"/>
+                <field name="level_ids"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_rental_asset_approval_config_form" model="ir.ui.view">
+        <field name="name">rental.asset.approval.config.form</field>
+        <field name="model">rental.asset.approval.config</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <field name="description"/>
+                        <field name="brand_ids" widget="many2many_tags"/>
+                    </group>
+                    <group>
+                        <field name="min_qty"/>
+                        <field name="max_qty" help="0 atau kosong = tidak terbatas"/>
+                    </group>
+                    <group>
+                        <field name="level_ids" widget="many2many_tags"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_rental_asset_approval_config" model="ir.actions.act_window">
+        <field name="name">Brand &amp; Qty Rules</field>
+        <field name="res_model">rental.asset.approval.config</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <menuitem id="menu_rental_asset_approval_config"
+              name="Brand &amp; Qty Rules"
+              parent="menu_rental_root"
+              action="action_rental_asset_approval_config"
+              sequence="40"/>
+
 </odoo>

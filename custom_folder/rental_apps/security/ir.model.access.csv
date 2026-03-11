@@ -3,4 +3,5 @@ access_rental_header_user,rental.header user,model_rental_asset_request_header,b
 access_rental_line_user,rental.line user,model_rental_asset_request_line,base.group_user,1,1,1,1
 access_rental_approval_user,rental.approval user,model_rental_asset_request_approval,base.group_user,1,1,1,1
 access_rental_approval_config_user,rental.approval.config user,model_rental_approval_config,base.group_user,1,1,1,1
+access_rental_asset_approval_config_user,rental.asset.approval.config user,model_rental_asset_approval_config,base.group_user,1,1,1,1
 access_rental_reject_wizard_user,rental.reject.wizard user,model_rental_asset_request_reject_wizard,base.group_user,1,1,1,1
