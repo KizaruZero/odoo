@@ -15,11 +15,12 @@ Rental amortization management:
     'category': 'Rental Apps',
     'version': '19.0.1.0.0',
 
-    'depends': ['base', 'mail', 'rental_apps'],
+    'depends': ['base', 'mail', 'account', 'rental_apps'],
 
     'data': [
         'security/ir.model.access.csv',
         'views/view_amortization.xml',
+        'views/cron.xml',
     ],
 
     'demo': [

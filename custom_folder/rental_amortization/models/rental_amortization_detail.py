@@ -26,3 +26,13 @@ class RentalAmortizationDetail(models.Model):
     principal_amount = fields.Float(string='Principal Amount', required=True)
     remaining_balance = fields.Float(string='Remaining Balance', required=True)
     notes = fields.Text(string='Notes')
+
+    installment_number = fields.Integer(string='Installment #', readonly=True)
+    installment_total = fields.Integer(string='Total Installments', readonly=True)
+
+    move_id = fields.Many2one(
+        'account.move',
+        string='Journal Entry',
+        readonly=True,
+        copy=False,
+    )
